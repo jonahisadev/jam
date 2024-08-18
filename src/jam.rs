@@ -18,7 +18,7 @@ pub struct Args {
 
     /// Specify [http, https, rsync, ftp]
     #[arg(long, short)]
-    pub protocol: Option<String>,
+    pub protocol: Vec<String>,
 
     /// Restrict to specific country
     #[arg(long, short)]
@@ -27,6 +27,10 @@ pub struct Args {
     /// Highest acceptable sync delay in seconds (defaults to 3600)
     #[arg(long, short)]
     pub delay: Option<u32>,
+
+    /// Maximum mirrors to leave uncommented in mirrorlist
+    #[arg(long, short = 'n')]
+    pub maximum_mirrors: Option<usize>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -48,12 +52,20 @@ pub struct ApiResponse {
     pub urls: Vec<Url>,
 }
 
-pub fn maybe_absent_compare(argument: &Option<String>, given: &String) -> bool {
+pub fn maybe_absent_compare<T: PartialEq>(argument: &Option<T>, given: &T) -> bool {
     if let Some(unwrapped) = argument {
         unwrapped == given
     } else {
         true
     }
+}
+
+pub fn maybe_absent_list<T: PartialEq>(argument: &Vec<T>, given: &T) -> bool {
+    if argument.len() == 0 {
+        return true;
+    }
+
+    return argument.contains(&given);
 }
 
 pub fn process_mirrors(res: ApiResponse, args: &Args) -> Vec<Url> {
@@ -66,7 +78,7 @@ pub fn process_mirrors(res: ApiResponse, args: &Args) -> Vec<Url> {
             }
 
             maybe_absent_compare(&args.country, &m.country_code)
-                && maybe_absent_compare(&args.protocol, &m.protocol)
+                && maybe_absent_list(&args.protocol, &m.protocol)
                 && m.completion_pct == Some(1.0)
                 && m.delay <= Some(args.delay.unwrap_or(3600))
                 && m.duration_avg.unwrap() + m.duration_stddev.unwrap() <= 1.0

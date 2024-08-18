@@ -37,6 +37,12 @@ I'm setting my protocol to https only, my country to US, and setting the output
 file path. If no output file path is provided, the list will be printed to
 the console.
 
+You can also set multiple protocols as follows:
+
+```bash
+$ jam -p https -p rsync
+```
+
 ## Contributing
 
 If anyone _wants_ to contribute, I will welcome PRs. I'm not a Rust programmer,

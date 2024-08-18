@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .into_iter()
         .enumerate()
         .map(|(i, m)| {
-            if i < 10 {
+            if i < args.maximum_mirrors.unwrap_or(10) {
                 format!("Server = {}$repo/os/$arch", m.url)
             } else {
                 format!("#Server = {}$repo/os/$arch", m.url)
